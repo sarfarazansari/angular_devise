@@ -2,6 +2,6 @@
     'use strict';
     var devise = angular.module('Devise', []);
 
-    // @include ../401.js
+    // @include ../clientErrors.js
     // @include ../auth.js
 })(angular);

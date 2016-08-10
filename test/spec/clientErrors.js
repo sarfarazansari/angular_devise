@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Service: Devise.401', function () {
+describe('Service: Devise.resError', function () {
 
     // load the service's module
     beforeEach(module('Devise'));
@@ -31,15 +31,15 @@ describe('Service: Devise.401', function () {
 
             it('can be disabled per request', inject(function ($rootScope) {
                 var callback = jasmine.createSpy('callback');
-                $rootScope.$on('devise:unauthorized', callback);
+                $rootScope.$on('responseError', callback);
                 $http.get('/foo', { interceptAuth: false });
                 $httpBackend.flush();
                 expect(callback).not.toHaveBeenCalled();
             }));
 
-            it('broadcasts "devise:unauthorized" on 401 error', inject(function ($rootScope) {
+            it('broadcasts "responseError" on 401 error', inject(function ($rootScope) {
                 var callback = jasmine.createSpy('callback');
-                $rootScope.$on('devise:unauthorized', callback);
+                $rootScope.$on('responseError', callback);
                 $http.get('/foo');
                 $httpBackend.flush();
                 expect(callback).toHaveBeenCalled();
@@ -47,7 +47,7 @@ describe('Service: Devise.401', function () {
 
             it('passes response to broadcast', inject(function ($rootScope) {
                 var response;
-                $rootScope.$on('devise:unauthorized', function(event, resp) {
+                $rootScope.$on('responseError', function(event, resp) {
                     response = resp;
                 });
 
@@ -59,7 +59,7 @@ describe('Service: Devise.401', function () {
 
             it('passes a deferred to broadcast', inject(function ($rootScope) {
                 var deferred;
-                $rootScope.$on('devise:unauthorized', function(event, resp, d) {
+                $rootScope.$on('responseError', function(event, resp, d) {
                     deferred = d;
                 });
 
@@ -72,7 +72,7 @@ describe('Service: Devise.401', function () {
 
             it("returns deferred's promise", inject(function ($rootScope) {
                 var data = {};
-                $rootScope.$on('devise:unauthorized', function(event, response, deferred) {
+                $rootScope.$on('responseError', function(event, response, deferred) {
                     deferred.resolve(data);
                 });
 
@@ -96,13 +96,32 @@ describe('Service: Devise.401', function () {
 
             it('can be enabled per request', inject(function ($rootScope) {
                 var callback = jasmine.createSpy('callback');
-                $rootScope.$on('devise:unauthorized', callback);
+                $rootScope.$on('responseError', callback);
                 $http.get('/foo', { interceptAuth: true });
                 $httpBackend.flush();
                 expect(callback).toHaveBeenCalled();
             }));
 
         });
+    });
+
+
+    describe('responseError if 500', function() {
+        beforeEach(function() {
+            $httpBackend.expect('GET', '/foo').respond(500);
+            AuthInterceptProvider.interceptAuth();
+        });
+        afterEach(function() {
+            AuthInterceptProvider.interceptAuth(false);
+        });
+
+        it('can be enabled per request', inject(function ($rootScope) {
+            var callback = jasmine.createSpy('callback');
+            $rootScope.$on('responseError', callback);
+            $http.get('/foo', { interceptAuth: true });
+            $httpBackend.flush();
+            expect(callback).not.toHaveBeenCalled();
+        }));
     });
 
 });

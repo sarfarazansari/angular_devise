@@ -2,3 +2,5 @@
 node_modules/
 test/support/
 reports/
+angular_devise.sublime-workspace
+angular_devise.sublime-project
